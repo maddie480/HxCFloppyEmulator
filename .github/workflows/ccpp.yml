@@ -18,6 +18,12 @@ jobs:
     - uses: actions/checkout@main
     - name: Build
       run: sudo apt update && sudo apt install -q -y libx11-dev libfreetype6 libfreetype6-dev libxft-dev libxft2 && cd build && make tests -j2
+    - name: Package
+      run: cd build && ./linuxcreatezip.sh
+    - uses: actions/upload-artifact@main
+      with:
+        name: hxcfloppyemulator-linux-${{ github.sha }}
+        path: build/HxCFloppyEmulator_Software_linux.zip
 
   build-windows-x86:
     runs-on: ubuntu-22.04
