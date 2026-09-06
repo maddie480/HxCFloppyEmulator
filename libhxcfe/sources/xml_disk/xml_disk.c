@@ -467,6 +467,8 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 
 	switch(ad->current_state)
 	{
+		case LIBHXCFE_VERSION:
+		break;
 		case DISK_LAYOUT_NAME:
 			strncpy((char*)&ad->name,(char*)buffer,XML_STRING_MAXSIZE - 1);
 			ad->name[XML_STRING_MAXSIZE - 1] = 0;

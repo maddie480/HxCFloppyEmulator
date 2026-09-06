@@ -9,6 +9,7 @@ typedef struct keyword_
 enum
 {
 	ENTRY_STATE,
+	LIBHXCFE_VERSION,
 	DISK_LAYOUT,
 	DISK_LAYOUT_NAME,
 	DISK_LAYOUT_DESCRIPTION,
@@ -70,6 +71,7 @@ enum
 keyword keyword_list[]=
 {
 	{"disk_layout",                 DISK_LAYOUT,                ENTRY_STATE},
+	{"libhxcfe_version",            LIBHXCFE_VERSION,           DISK_LAYOUT},
 	{"disk_layout_name",            DISK_LAYOUT_NAME,           DISK_LAYOUT},
 	{"disk_layout_description",     DISK_LAYOUT_DESCRIPTION,    DISK_LAYOUT},
 	{"prefered_file_extension",     FILEEXT,                    DISK_LAYOUT},
