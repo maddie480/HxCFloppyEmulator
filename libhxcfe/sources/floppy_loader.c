@@ -1688,7 +1688,7 @@ int32_t hxcfe_setSectorDataCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc )
 	fb_track_state * cur_track;
 
 	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_data_crc=0xFF;
+	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_data_crc = 0x2;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].data_crc=crc;
 	return HXCFE_NOERROR;
 }
@@ -1698,7 +1698,7 @@ int32_t hxcfe_setSectorHeaderCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc )
 	fb_track_state * cur_track;
 
 	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_header_crc=0xFF;
+	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_header_crc = 0x2;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].header_crc=crc;
 	return HXCFE_NOERROR;
 }
