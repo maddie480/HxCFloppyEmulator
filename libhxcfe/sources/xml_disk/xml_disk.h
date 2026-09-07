@@ -67,7 +67,14 @@ enum
 	TRACK_PREGAP_US,
 	SET_INDEX_LENGTH,
 	SET_INDEX_POSITION,
-	FORMAT_SECTOR
+	FORMAT_SECTOR,
+	START_SECTOR_CELL,
+	START_DATASECTOR_CELL,
+	END_SECTOR_CELL,
+	SECTOR_SECTOR_US,
+	SECTOR_DURATION_US,
+	TRACK_LENGTH_CELLS,
+	TRACK_LENGTH_US
 };
 
 keyword keyword_list[]=
@@ -119,6 +126,8 @@ keyword keyword_list[]=
 	{"interleave",                  INTERLEAVE_TRACK,           TRACK},
 	{"index_len_us",                SET_INDEX_LENGTH,           TRACK},
 	{"add_index_us",                SET_INDEX_POSITION,         TRACK},
+	{"track_length_cells",          TRACK_LENGTH_CELLS,         TRACK},
+	{"track_length_us",             TRACK_LENGTH_US,            TRACK},
 	{"sector",                      SECTOR,                     SECTORLIST},
 	{"track_id",                    TRACKID_SECTOR,             SECTOR},
 	{"side_id",                     SIDEID_SECTOR,              SECTOR},
@@ -134,5 +143,10 @@ keyword keyword_list[]=
 	{"sector_size",                 SECTORSIZE_SECTOR,          SECTOR},
 	{"data_offset",                 DATAOFFSETSECTOR,           SECTOR},
 	{"format",                      FORMAT_SECTOR,              SECTOR},
+	{"start_sector_cell",           START_SECTOR_CELL,          SECTOR},
+	{"start_datasector_cell",       START_DATASECTOR_CELL,      SECTOR},
+	{"end_sector_cell",             END_SECTOR_CELL,            SECTOR},
+	{"start_sector_us",             SECTOR_SECTOR_US,           SECTOR},
+	{"sector_duration_us",          SECTOR_DURATION_US,         SECTOR},
 	{0,0,0}
 };

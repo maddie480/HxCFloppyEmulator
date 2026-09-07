@@ -40,6 +40,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "floppy_utils.h"
+
 #include "version.h"
 
 void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int * format_id, int *sectorsize)
@@ -223,6 +225,12 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					fprintf(xmlfile,"\t\t\t<track track_number=\"%.2d\" side_number=\"%d\">\n",j,i);
 					fprintf(xmlfile,"\t\t\t\t<data_offset>0x%.6X</data_offset>\n",fileoffset);
 
+					if( export_mode > 0 )
+					{
+						fprintf(xmlfile,"\t\t\t\t<track_length_cells>%d</track_length_cells>\n",floppy->tracks[j]->sides[i]->tracklen);
+						fprintf(xmlfile,"\t\t\t\t<track_length_us>%.2f</track_length_us>\n",GetTrackPeriod(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i])*1000*1000);
+					}
+
 					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&trackformatid,&sectorsize);
 					fprintf(xmlfile,"\t\t\t\t<format>%s</format>\n",trackformat);
 
@@ -330,17 +338,26 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										}
 									}
 
-									if(sectp->head != i)
+									if(sectp->head != i || export_mode > 0)
 									{
 										fprintf(xmlfile,"\t\t\t\t\t\t<side_id>0x%.2X</side_id>\n",sectp->head);
 									}
 
-									if(sectp->cylinder != j)
+									if(sectp->cylinder != j || export_mode > 0)
 									{
 										fprintf(xmlfile,"\t\t\t\t\t\t<track_id>0x%.2X</track_id>\n",sectp->cylinder);
 									}
 
-									if(sectp->use_alternate_datamark)
+									if(export_mode > 0)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_cell>%d</start_sector_cell>\n",sectp->startsectorindex);
+										fprintf(xmlfile,"\t\t\t\t\t\t<start_datasector_cell>%d</start_datasector_cell>\n",sectp->startdataindex);
+										fprintf(xmlfile,"\t\t\t\t\t\t<end_sector_cell>%d</end_sector_cell>\n",sectp->endsectorindex);	
+										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_us>%.2f</start_sector_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],0,sectp->startsectorindex) * 1000 * 1000);
+										fprintf(xmlfile,"\t\t\t\t\t\t<sector_duration_us>%.2f</sector_duration_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],sectp->startsectorindex,sectp->endsectorindex) * 1000 * 1000);
+									}
+	
+									if(sectp->use_alternate_datamark || export_mode > 0)
 									{
 										fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sectp->alternate_datamark);
 									}
