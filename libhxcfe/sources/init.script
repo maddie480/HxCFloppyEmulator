@@ -393,6 +393,13 @@ set ORICDSK_LOADER_REGENERATE_TRACK 1                 # Extract the sectors data
                                                       # the whole track.
 
 #
+# XML writer parameters
+#
+
+set XMLEXPORT_MODE 0                                  # 0 : Default standard export mode
+                                                      # 1 : Verbose export mode : all CRC value and status and others details...
+
+#
 # 2008 USB HxC Floppy Emulator parameters
 # ( FTDI + CPLD based hardware )
 #

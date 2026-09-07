@@ -128,6 +128,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int i,j,k,s,vs;
 	FILE * xmlfile;
 	int fileoffset;
+	int export_mode;
 	int32_t nb_sectorfound,nb_validsectorfound;
 	int nbsect,firstsectid,sectorsize,imagesize;
 	char trackformat[32];
@@ -145,6 +146,8 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write XML file %s...",filename);
 
 	fileoffset = 0;
+
+	export_mode = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "XMLEXPORT_MODE" );
 
 	xmlfile=hxc_fopen(filename,"w+");
 	if(xmlfile)
@@ -344,20 +347,32 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 									fprintf(xmlfile,"\t\t\t\t\t\t<data_offset>0x%.6X</data_offset>\n",(unsigned int)sectoffset[vs]->offset);
 
-									if(sectp->use_alternate_header_crc)
+									if(sectp->use_alternate_header_crc || export_mode > 0)
 									{
 										if(sectp->use_alternate_header_crc & 1)
-											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc><!-- Bad Header CRC status -->\n",(unsigned int)sectp->header_crc);
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc_status>Bad</header_crc_status>\n");
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc>\n",(unsigned int)sectp->header_crc);
+										}
 										else
-											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc>\n",(unsigned int)sectp->data_crc);
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc_status>Valid</header_crc_status>\n");
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc>\n",(unsigned int)sectp->header_crc);
+										}
 									}
 
-									if(sectp->use_alternate_data_crc)
+									if(sectp->use_alternate_data_crc || export_mode > 0)
 									{
 										if(sectp->use_alternate_data_crc & 1)
-											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc><!-- Bad Data CRC status -->\n",(unsigned int)sectp->data_crc);
-										else
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc_status>Bad</data_crc_status>\n");
 											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc>\n",(unsigned int)sectp->data_crc);
+										}
+										else
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc_status>Valid</data_crc_status>\n");											
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc>\n",(unsigned int)sectp->data_crc);
+										}
 									}
 
 									fprintf(xmlfile,"\t\t\t\t\t</sector>\n");
