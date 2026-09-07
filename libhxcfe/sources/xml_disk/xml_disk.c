@@ -203,6 +203,99 @@ int is_ext_matching(char * filename,char * extlist)
 	return 0;
 }
 
+static int strbin2val( char * str )
+{
+	int l;
+	int val;
+	int mask;
+
+	val = 0;
+
+	// -> end of the string
+	l = 0;
+	while(str[l])
+	{
+		l++;
+	}
+
+	// -> find the lowest bit
+	while(l)
+	{
+		if( str[l] == '1' || str[l] == '0' )
+		{
+			break;
+		}
+		l--;
+	};
+
+	mask = 0x1;
+	// convert
+	while(l >= 0)
+	{
+		if( str[l] != '1' && str[l] != '0' )
+		{
+			break;
+		}
+
+		if( str[l] == '1')
+		{
+			val |= mask;
+		}
+
+		mask <<= 1;
+
+		l--;
+	}
+
+	return val;
+}
+
+static int str2int(char * str)
+{
+	int value;
+
+	value = 0;
+
+	if(str)
+	{
+		if( strlen(str) > 2 )
+		{
+			if( str[0]=='0' )
+			{
+				switch( str[1] )
+				{
+					// hex
+					case 'x':
+					case 'X':
+						value = (int)strtoul(str, NULL, 0);
+					break;
+
+					// binary
+					case 'b':
+					case 'B':
+						value = strbin2val(str);
+					break;
+
+					// decimal
+					default:
+						value = atoi(str);
+					break;
+				}
+			}
+			else
+			{
+				value = atoi(str);
+			}
+		}
+		else
+		{
+			value = atoi(str);
+		}
+	}
+
+	return value;
+}
+
 int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 {
 	int i,j,ret;
@@ -492,56 +585,56 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->double_step = 0;
 		break;
 		case FILESIZE:
-			ad->file_size = atoi(buffer);
+			ad->file_size = str2int(buffer);
 		break;
 		case WRITE_PROTECT:
-			ad->write_protect = atoi(buffer);
+			ad->write_protect = str2int(buffer);
 		break;
 /*      case TRACKSIZE:
-			ad->track_size = atoi(buffer);
+			ad->track_size = str2int(buffer);
 		break;*/
 		case MINNUMBEROFTRACKS:
-			ad->min_nb_of_tracks = atoi(buffer);
+			ad->min_nb_of_tracks = str2int(buffer);
 		break;
 		case MAXNUMBEROFTRACKS:
-			ad->max_nb_of_tracks = atoi(buffer);
+			ad->max_nb_of_tracks = str2int(buffer);
 		break;
 
 		case NUMBEROFTRACK:
-			ad->nb_of_tracks = atoi(buffer);
+			ad->nb_of_tracks = str2int(buffer);
 			if(!ad->xmlcheck)
 				hxcfe_setNumberOfTrack (ad->fb,(unsigned short)ad->nb_of_tracks);
 		break;
 		case NUMBEROFSIDE:
-			ad->nb_of_sides = (unsigned short)atoi(buffer);
+			ad->nb_of_sides = (unsigned short)str2int(buffer);
 			if(!ad->xmlcheck)
 				hxcfe_setNumberOfSide (ad->fb,(unsigned char)ad->nb_of_sides);
 		break;
 		case NUMBEROFSECTOR:
-			ad->nb_sectors_per_track = (unsigned short)atoi(buffer);
+			ad->nb_sectors_per_track = (unsigned short)str2int(buffer);
 			if(!ad->xmlcheck)
 				hxcfe_setNumberOfSector (ad->fb,(unsigned short)ad->nb_sectors_per_track);
 		break;
 		case SECTORSIZE:
-			ad->sector_size = (unsigned short)atoi(buffer);
+			ad->sector_size = (unsigned short)str2int(buffer);
 			if(!ad->xmlcheck)
 				hxcfe_setSectorSize(ad->fb,ad->sector_size);
 		break;
 		case INTERLEAVE_TRACK:
 		case INTERLEAVE:
 			if(!ad->xmlcheck)
-				hxcfe_setTrackInterleave(ad->fb,atoi(buffer));
+				hxcfe_setTrackInterleave(ad->fb,str2int(buffer));
 		break;
 		case SKEW_TRACK:
 		case SKEW:
 			if(!ad->xmlcheck)
-				hxcfe_setTrackSkew(ad->fb,atoi(buffer));
+				hxcfe_setTrackSkew(ad->fb,str2int(buffer));
 		break;
 		case SKEW_PER_TRACK:
-			ad->skew_per_track = atoi(buffer);
+			ad->skew_per_track = str2int(buffer);
 		break;
 		case SKEW_PER_SIDE:
-			ad->skew_per_side = atoi(buffer);
+			ad->skew_per_side = str2int(buffer);
 		break;
 		case FORMATVALUE:
 		case DATAFILL_SECTOR:
@@ -602,47 +695,47 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 		case TRACK_PREGAP:
 		case PREGAP:
 			if(!ad->xmlcheck)
-				hxcfe_setTrackPreGap (ad->fb,(unsigned short)atoi(buffer));
+				hxcfe_setTrackPreGap (ad->fb,(unsigned short)str2int(buffer));
 		break;
 		case TRACK_PREGAP_US:
 			if(!ad->xmlcheck)
-				hxcfe_setTrackPreGap (ad->fb,atoi(buffer) | 0x40000000);
+				hxcfe_setTrackPreGap (ad->fb,str2int(buffer) | 0x40000000);
 		break;
 		case TRACK_GAP3:
 		case GAP3:
 			if(!ad->xmlcheck)
-				hxcfe_setSectorGap3 (ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setSectorGap3 (ad->fb,(unsigned char)str2int(buffer));
 		break;
 		case RPM:
 			if(!ad->xmlcheck)
-				hxcfe_setRPM (ad->fb,(unsigned short)atoi(buffer));
+				hxcfe_setRPM (ad->fb,(unsigned short)str2int(buffer));
 		break;
 		case DISK_CRC32:
 		break;
 		case TRACK_LENGTH:
 			if(!ad->xmlcheck)
-				hxcfe_setRPM (ad->fb,(atoi(buffer)/10) | 0x40000000);
+				hxcfe_setRPM (ad->fb,(str2int(buffer)/10) | 0x40000000);
 		break;
 		case SECTORIDSTART:
 			if(!ad->xmlcheck)
-				hxcfe_setStartSectorID(ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setStartSectorID(ad->fb,(unsigned char)str2int(buffer));
 		break;
 		case TRACKID_SECTOR:
 			if(!ad->xmlcheck)
-				hxcfe_setSectorTrackID(ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setSectorTrackID(ad->fb,(unsigned char)str2int(buffer));
 		break;
 		case SIDEID_SECTOR:
 			if(!ad->xmlcheck)
-				hxcfe_setSectorHeadID(ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setSectorHeadID(ad->fb,(unsigned char)str2int(buffer));
 		break;
 		case SECTORID_SECTOR:
 			if(!ad->xmlcheck)
-				hxcfe_setSectorID(ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setSectorID(ad->fb,(unsigned char)str2int(buffer));
 		break;
 
 		case BITRATE:
 			if(!ad->xmlcheck)
-				hxcfe_setTrackBitrate(ad->fb,atoi(buffer));
+				hxcfe_setTrackBitrate(ad->fb,str2int(buffer));
 		break;
 		case DATAOFFSET:
 			track = ad->statestack[ad->stack_ptr].cur_track;
@@ -723,7 +816,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 		case SET_INDEX_LENGTH:
 			if(!ad->xmlcheck)
 			{
-				ad->index_length = atoi(buffer);
+				ad->index_length = str2int(buffer);
 				hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
 			}
 		break;
@@ -732,7 +825,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 			{
 				hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
-				hxcfe_setIndexPosition(ad->fb,ad->cur_index_number,atoi(buffer),1);
+				hxcfe_setIndexPosition(ad->fb,ad->cur_index_number,str2int(buffer),1);
 			}
 
 			ad->cur_index_number++;
@@ -777,7 +870,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 				}
 				if(attr[i+1])
 				{
-					track = atoi(attr[i+1]);
+					track = str2int((char*)attr[i+1]);
 				}
 
 				i=0;
@@ -787,7 +880,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 				}
 				if(attr[i+1])
 				{
-					side = atoi(attr[i+1]);
+					side = str2int((char*)attr[i+1]);
 				}
 
 				ad->statestack[ad->stack_ptr].cur_track = (track<<1) | (side&1);
@@ -805,7 +898,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 				}
 				if(attr[i+1])
 				{
-					sector = atoi(attr[i+1]);
+					sector = str2int((char*)attr[i+1]);
 				}
 
 				i=0;
@@ -813,9 +906,10 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 				{
 					i++;
 				}
+
 				if(attr[i+1])
 				{
-					sectorsize = atoi(attr[i+1]);
+					sectorsize = str2int((char*)attr[i+1]);
 				}
 
 				track = ad->statestack[ad->stack_ptr].cur_track;
