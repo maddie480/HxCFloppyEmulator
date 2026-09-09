@@ -245,7 +245,7 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
-						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
+						floppycontext->hxc_printf(MSG_DEBUG,"get_next_AED6200P_sector : Data sector without sector header !?!");
 
 						sector->cylinder = 0;
 						sector->head = 0;
