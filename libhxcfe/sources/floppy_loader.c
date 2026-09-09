@@ -1714,6 +1714,17 @@ int32_t hxcfe_setSectorDataMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark )
 	return HXCFE_NOERROR;
 }
 
+int32_t hxcfe_setSectorAddressMark ( HXCFE_FLPGEN* fb_ctx, uint32_t addressmark )
+{
+	fb_track_state * cur_track;
+
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_addressmark = 0xFF;
+	cur_track->sc_stack[cur_track->sc_stack_pointer].alternate_addressmark = addressmark;
+
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_setInterfaceMode( HXCFE_FLPGEN* fb_ctx, int32_t mode )
 {
 	fb_track_state * cur_track;

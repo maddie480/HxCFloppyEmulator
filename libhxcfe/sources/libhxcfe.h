@@ -294,6 +294,7 @@ int32_t                hxcfe_setSectorEncoding ( HXCFE_FLPGEN* fb_ctx, int32_t e
 int32_t                hxcfe_setSectorDataCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc );
 int32_t                hxcfe_setSectorHeaderCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc );
 
+int32_t                hxcfe_setSectorAddressMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark );
 int32_t                hxcfe_setSectorDataMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark );
 
 int32_t                hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t size );
