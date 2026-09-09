@@ -547,7 +547,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 {
 	AppData *ad = (AppData *) data;
 	char * buffer;
-	unsigned int datamark;
+	unsigned int addressmark,datamark;
 	unsigned int crc;
 	int track,sectorsize,i;
 	int tmp_base_adress;
@@ -753,6 +753,13 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					hxcfe_setSectorData(ad->fb,&ad->image_data[tmp_base_adress],sectorsize);
 				}
+			}
+		break;
+		case ADDRESSMARK_SECTOR:
+			if(!ad->xmlcheck)
+			{
+				sscanf(buffer,"0x%X",&addressmark);
+				hxcfe_setSectorAddressMark (ad->fb,(unsigned char)addressmark);
 			}
 		break;
 		case DATAMARK_SECTOR:

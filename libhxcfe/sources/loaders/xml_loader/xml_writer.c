@@ -356,7 +356,12 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_us>%.2f</start_sector_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],0,sectp->startsectorindex) * 1000 * 1000);
 										fprintf(xmlfile,"\t\t\t\t\t\t<sector_duration_us>%.2f</sector_duration_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],sectp->startsectorindex,sectp->endsectorindex) * 1000 * 1000);
 									}
-	
+
+									if(export_mode > 0)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<addressmark>0x%.2X</addressmark>\n",sectp->alternate_addressmark);
+									}
+
 									if(sectp->use_alternate_datamark || export_mode > 0)
 									{
 										fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sectp->alternate_datamark);
