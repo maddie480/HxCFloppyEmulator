@@ -142,7 +142,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					sector->trackencoding = ISOFORMAT_DD;
 					sector->alternate_datamark = 0x00;
 					sector->use_alternate_datamark = 0x00;
-					sector->alternate_addressmark = 0xFE;
+					sector->alternate_addressmark = tmp_buffer[3];
 					sector->use_alternate_addressmark = 0xFF;
 					sector->header_crc = ( tmp_buffer[SECT_HEADER_SIZE-2]<<8 ) | tmp_buffer[SECT_HEADER_SIZE-1] ;
 					sector->use_alternate_header_crc = 0xFF;

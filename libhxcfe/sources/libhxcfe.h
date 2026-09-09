@@ -639,6 +639,7 @@ int32_t                hxcfe_getSectorConfigStartSectorIndex( HXCFE* floppyconte
 int32_t                hxcfe_getSectorConfigStartDataIndex( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigEndSectorIndex( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 uint8_t *              hxcfe_getSectorConfigInputData( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigAddressMark( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigDataMark( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigHCRCStatus( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigDCRCStatus( HXCFE* floppycontext, HXCFE_SECTCFG* sc );

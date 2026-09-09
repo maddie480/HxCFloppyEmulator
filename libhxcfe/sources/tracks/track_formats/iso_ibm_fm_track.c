@@ -128,7 +128,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 					sector->startdataindex = sector->endsectorindex;
 
 					sector->use_alternate_addressmark = 0xFF;
-					sector->alternate_addressmark = 0xFE;
+					sector->alternate_addressmark = tmp_buffer[0];
 
 					sector->use_alternate_datamark = 0x00;
 					sector->alternate_datamark = 0x00;

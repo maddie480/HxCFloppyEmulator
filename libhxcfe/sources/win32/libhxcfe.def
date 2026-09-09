@@ -195,6 +195,7 @@ EXPORTS
    hxcfe_getSectorConfigDataMark            @462
    hxcfe_getSectorConfigHCRCStatus          @463
    hxcfe_getSectorConfigDCRCStatus          @464
+   hxcfe_getSectorConfigAddressMark         @465
 
    hxcfe_getSide                            @500
    hxcfe_shiftTrackData                     @501

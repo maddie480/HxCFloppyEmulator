@@ -870,6 +870,15 @@ int32_t hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 	return 0;
 }
 
+int32_t hxcfe_getSectorConfigAddressMark(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+{
+	if(sc)
+	{
+		return sc->alternate_addressmark;
+	}
+	return 0;
+}
+
 int32_t hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)

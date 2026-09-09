@@ -811,7 +811,8 @@ char * gen_info_txt(char * outbuf, int view_mode, int track, int side, int start
 					hxcfe_getSectorConfigSizeID(guicontext->hxcfe,sl->sectorconfig)
 					);
 
-				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"DataMark:0x%.2X\nHead CRC:0x%.4X (%s)\nData CRC:0x%.4X (%s)\n",
+				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"AddressMark:0x%.2X\nDataMark:0x%.2X\nHead CRC:0x%.4X (%s)\nData CRC:0x%.4X (%s)\n",
+					hxcfe_getSectorConfigAddressMark(guicontext->hxcfe,sl->sectorconfig),
 					hxcfe_getSectorConfigDataMark(guicontext->hxcfe,sl->sectorconfig),
 					hxcfe_getSectorConfigHCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigHCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok",
 					hxcfe_getSectorConfigDCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigDCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok");
