@@ -439,6 +439,10 @@ set BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION 1
 # Default sectors size ID mask
 set SECTOR_SIZE_FIELD_MASK 0x7
 
+# 0xFF mask in normal operation. 0xFC mask to extract sectors with 0xFC IDAM
+set MFM_IDAM_FIELD_MASK 0xFF
+set  FM_IDAM_FIELD_MASK 0xFF
+
 #
 # Default User interface "last state" variables
 #

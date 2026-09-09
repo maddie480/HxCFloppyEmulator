@@ -81,7 +81,8 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	int sector_extractor_sm;
 	int k,i;
 	unsigned char crctable[32];
-	uint8_t mask;
+	uint8_t sector_size_mask;
+	uint8_t idam_mask;
 
 	//        C D C D  C D C D
 	//0xF8 - 00010100 01000100 // 0x1444
@@ -91,6 +92,18 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	//0xFC - 00010101 01000100 // 0x1544
 	//0xFD - 00010101 01000101 // 0x1545
 	unsigned short datamark[6]={0x1444,0x1445,0x1454,0x1455,0x1544,0x1545};
+
+	sector_size_mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
+	if( sector_size_mask <= 0 )
+	{
+		sector_size_mask = 0x7;
+	}
+
+	idam_mask = hxcfe_getEnvVarValue( floppycontext, "FM_IDAM_FIELD_MASK" );
+	if( idam_mask <= 0 )
+	{
+		idam_mask = 0xFF;
+	}
 
 	bit_offset=track_offset;
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
@@ -122,7 +135,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 			case LOOKFOR_ADDM:
 				sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
-				if(tmp_buffer[0]==0xFE)
+				if( ( tmp_buffer[0] & idam_mask ) == ( 0xFE & idam_mask ) )
 				{
 					sector->startsectorindex = bit_offset;
 					sector->startdataindex = sector->endsectorindex;
@@ -137,13 +150,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 					sector->head = tmp_buffer[2];
 					sector->sector = tmp_buffer[3];
 
-					mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
-					if( mask <= 0 )
-					{
-						mask = 0x7;
-					}
-
-					sector->sectorsize = sectorsize[tmp_buffer[4] & mask];
+					sector->sectorsize = sectorsize[tmp_buffer[4] & sector_size_mask];
 					sector->alternate_sector_size_id = tmp_buffer[4];
 					sector->trackencoding = ISOFORMAT_SD;
 
@@ -169,7 +176,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 						bit_offset = chgbitptr(track->tracklen,bit_offset,7 * 8);
 
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[1],tmp_buffer[2],tmp_buffer[3],sectorsize[tmp_buffer[4] & mask]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[1],tmp_buffer[2],tmp_buffer[3],sectorsize[tmp_buffer[4] & sector_size_mask]);
 						old_bit_offset=bit_offset;
 
 						sector_size = sector->sectorsize;

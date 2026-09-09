@@ -81,7 +81,20 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	int sector_extractor_sm;
 	int k;
 	unsigned char crctable[32];
-	uint8_t mask;
+	uint8_t sector_size_mask;
+	uint8_t idam_mask;
+
+	sector_size_mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
+	if( sector_size_mask <= 0 )
+	{
+		sector_size_mask = 0x7;
+	}
+
+	idam_mask = hxcfe_getEnvVarValue( floppycontext, "MFM_IDAM_FIELD_MASK" );
+	if( idam_mask <= 0 )
+	{
+		idam_mask = 0xFF;
+	}
 
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
@@ -117,7 +130,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 			case LOOKFOR_ADDM:
 				tmp_bit_offset = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
-				if(tmp_buffer[3]==0xFE)
+				if( (tmp_buffer[3] & idam_mask) == (0xFE & idam_mask) ) // Masked 0xFE
 				{
 					#define SECT_HEADER_SIZE (3+7)
 
@@ -131,13 +144,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					sector->head = tmp_buffer[5];
 					sector->sector = tmp_buffer[6];
 
-					mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
-					if( mask <= 0 )
-					{
-						mask = 0x7;
-					}
-
-					sector->sectorsize = sectorsize[tmp_buffer[7] & mask];
+					sector->sectorsize = sectorsize[tmp_buffer[7] & sector_size_mask];
 					sector->alternate_sector_size_id = tmp_buffer[7];
 					sector->trackencoding = ISOFORMAT_DD;
 					sector->alternate_datamark = 0x00;
@@ -197,7 +204,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
 
-						if(tmp_sector[3] != 0xFE)
+						if( (tmp_sector[3] & idam_mask) != (0xFE & idam_mask) )
 						{
 							sector->alternate_datamark = tmp_sector[3];
 							sector->use_alternate_datamark = 0xFF;
@@ -270,7 +277,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							// "Empty" sector detection
 							checkEmptySector(sector);
 
-							if(sector->alternate_datamark!=0xFE)
+							if( (sector->alternate_datamark & idam_mask) != (0xFE & idam_mask) )
 								bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 						}
 						else
