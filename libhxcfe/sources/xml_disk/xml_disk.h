@@ -75,7 +75,16 @@ enum
 	SECTOR_SECTOR_US,
 	SECTOR_DURATION_US,
 	TRACK_LENGTH_CELLS,
-	TRACK_LENGTH_US
+	TRACK_LENGTH_US,
+	TRACK_WEAKBITS_CELLS,
+	TRACK_WEAKBITS_PERCENT,
+	SECTOR_STATUS,
+	SECTOR_WEAKBITS_CELLS,
+	SECTOR_WEAKBITS_PERCENT,
+	SECTORHEADER_WEAKBITS_CELLS,
+	SECTORHEADER_WEAKBITS_PERCENT,
+	SECTORDATA_WEAKBITS_CELLS,
+	SECTORDATA_WEAKBITS_PERCENT
 };
 
 keyword keyword_list[]=
@@ -129,6 +138,8 @@ keyword keyword_list[]=
 	{"add_index_us",                SET_INDEX_POSITION,         TRACK},
 	{"track_length_cells",          TRACK_LENGTH_CELLS,         TRACK},
 	{"track_length_us",             TRACK_LENGTH_US,            TRACK},
+	{"track_weakbits_cells",        TRACK_WEAKBITS_CELLS,       TRACK},
+	{"track_weakbits_percent",      TRACK_WEAKBITS_PERCENT,     TRACK},
 	{"sector",                      SECTOR,                     SECTORLIST},
 	{"track_id",                    TRACKID_SECTOR,             SECTOR},
 	{"side_id",                     SIDEID_SECTOR,              SECTOR},
@@ -150,5 +161,12 @@ keyword keyword_list[]=
 	{"end_sector_cell",             END_SECTOR_CELL,            SECTOR},
 	{"start_sector_us",             SECTOR_SECTOR_US,           SECTOR},
 	{"sector_duration_us",          SECTOR_DURATION_US,         SECTOR},
+	{"special_status",              SECTOR_STATUS,              SECTOR},
+	{"sector_weakbits_cells",         SECTOR_WEAKBITS_CELLS,          SECTOR},
+	{"sector_weakbits_percent",       SECTOR_WEAKBITS_PERCENT,        SECTOR},
+	{"sectorheader_weakbits_cells",   SECTORHEADER_WEAKBITS_CELLS,    SECTOR},
+	{"sectorheader_weakbits_percent", SECTORHEADER_WEAKBITS_PERCENT,  SECTOR},
+	{"sectordata_weakbits_cells",     SECTORDATA_WEAKBITS_CELLS,      SECTOR},
+	{"sectordata_weakbits_percent",   SECTORDATA_WEAKBITS_PERCENT,    SECTOR},
 	{0,0,0}
 };

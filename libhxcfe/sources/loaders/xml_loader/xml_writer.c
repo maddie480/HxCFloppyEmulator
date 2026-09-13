@@ -140,6 +140,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	sect_offset ** sorted_sectoffset,**sectoffset;
 	uint32_t crc32;
 	int trackformatid;
+	int cnt,t,size;
 
 	sectoffset = NULL;
 	sorted_sectoffset = NULL;
@@ -229,6 +230,23 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					{
 						fprintf(xmlfile,"\t\t\t\t<track_length_cells>%d</track_length_cells>\n",floppy->tracks[j]->sides[i]->tracklen);
 						fprintf(xmlfile,"\t\t\t\t<track_length_us>%.2f</track_length_us>\n",GetTrackPeriod(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i])*1000*1000);
+
+						if(floppy->tracks[j]->sides[i]->flakybitsbuffer)
+						{
+							size = floppy->tracks[j]->sides[i]->tracklen;
+							t = 0;
+							cnt = 0;
+							do
+							{
+								if( floppy->tracks[j]->sides[i]->flakybitsbuffer[t>>3] & (0x80>>(t&7)) )
+									cnt++;
+
+								t++;
+							}while( t < size);
+
+							fprintf(xmlfile,"\t\t\t\t<track_weakbits_cells>%d</track_weakbits_cells>\n",cnt);
+							fprintf(xmlfile,"\t\t\t\t<track_weakbits_percent>%.4f</track_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
+						}
 					}
 
 					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&trackformatid,&sectorsize);
@@ -350,9 +368,21 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 									if(export_mode > 0)
 									{
+										if( (sectp->startsectorindex == sectp->startdataindex) && ( sectp->startdataindex != sectp->endsectorindex) )
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<special_status>NO_HEADER</special_status>\n");
+										}
+										else
+										{
+											if( (sectp->startsectorindex != sectp->startdataindex) && ( sectp->startdataindex == sectp->endsectorindex) )
+											{
+												fprintf(xmlfile,"\t\t\t\t\t\t<special_status>NO_DATA</special_status>\n");
+											}
+										}
+
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_cell>%d</start_sector_cell>\n",sectp->startsectorindex);
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_datasector_cell>%d</start_datasector_cell>\n",sectp->startdataindex);
-										fprintf(xmlfile,"\t\t\t\t\t\t<end_sector_cell>%d</end_sector_cell>\n",sectp->endsectorindex);	
+										fprintf(xmlfile,"\t\t\t\t\t\t<end_sector_cell>%d</end_sector_cell>\n",sectp->endsectorindex);
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_us>%.2f</start_sector_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],0,sectp->startsectorindex) * 1000 * 1000);
 										fprintf(xmlfile,"\t\t\t\t\t\t<sector_duration_us>%.2f</sector_duration_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],sectp->startsectorindex,sectp->endsectorindex) * 1000 * 1000);
 									}
@@ -392,8 +422,61 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										}
 										else
 										{
-											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc_status>Valid</data_crc_status>\n");											
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc_status>Valid</data_crc_status>\n");
 											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc>\n",(unsigned int)sectp->data_crc);
+										}
+									}
+
+									if( floppy->tracks[j]->sides[i]->flakybitsbuffer && export_mode > 0)
+									{
+										size = floppy->tracks[j]->sides[i]->tracklen;
+
+										if( sectp->startsectorindex != sectp->endsectorindex )
+										{
+											t = sectp->startsectorindex;
+											cnt = 0;
+											do
+											{
+												if( floppy->tracks[j]->sides[i]->flakybitsbuffer[t>>3] & (0x80>>(t&7)) )
+													cnt++;
+
+												t = (t + 1) % size;
+											}while( t != sectp->endsectorindex);
+
+											fprintf(xmlfile,"\t\t\t\t\t\t<sector_weakbits_cells>%d</sector_weakbits_cells>\n",cnt);
+											fprintf(xmlfile,"\t\t\t\t\t\t<sector_weakbits_percent>%.4f</sector_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
+										}
+
+										if( sectp->startsectorindex != sectp->startdataindex )
+										{
+											t = sectp->startsectorindex;
+											cnt = 0;
+											do
+											{
+												if( floppy->tracks[j]->sides[i]->flakybitsbuffer[t>>3] & (0x80>>(t&7)) )
+													cnt++;
+
+												t = (t + 1) % size;
+											}while( t != sectp->startdataindex);
+
+											fprintf(xmlfile,"\t\t\t\t\t\t<sectorheader_weakbits_cells>%d</sectorheader_weakbits_cells>\n",cnt);
+											fprintf(xmlfile,"\t\t\t\t\t\t<sectorheader_weakbits_percent>%.4f</sectorheader_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
+										}
+
+										if( sectp->startdataindex != sectp->endsectorindex )
+										{
+											t = sectp->startdataindex;
+											cnt = 0;
+											do
+											{
+												if( floppy->tracks[j]->sides[i]->flakybitsbuffer[t>>3] & (0x80>>(t&7)) )
+													cnt++;
+
+												t = (t + 1) % size;
+											}while( t != sectp->endsectorindex);
+
+											fprintf(xmlfile,"\t\t\t\t\t\t<sectordata_weakbits_cells>%d</sectordata_weakbits_cells>\n",cnt);
+											fprintf(xmlfile,"\t\t\t\t\t\t<sectordata_weakbits_percent>%.4f</sectordata_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
 										}
 									}
 
