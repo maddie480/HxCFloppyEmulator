@@ -140,7 +140,9 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	sect_offset ** sorted_sectoffset,**sectoffset;
 	uint32_t crc32;
 	int trackformatid;
-	int cnt,t,size;
+	int t,size;
+	#define HISTOSIZE 32
+	unsigned int mini_histo[HISTOSIZE];
 
 	sectoffset = NULL;
 	sorted_sectoffset = NULL;
@@ -228,12 +230,53 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 					if( export_mode > 0 )
 					{
-						fprintf(xmlfile,"\t\t\t\t<track_length_cells>%d</track_length_cells>\n",floppy->tracks[j]->sides[i]->tracklen);
+						int cnt;
+						unsigned int spacecnt;
+
+						size = floppy->tracks[j]->sides[i]->tracklen;
+
+						fprintf(xmlfile,"\t\t\t\t<track_length_cells>%d</track_length_cells>\n",size);
 						fprintf(xmlfile,"\t\t\t\t<track_length_us>%.2f</track_length_us>\n",GetTrackPeriod(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i])*1000*1000);
+
+						t = 0;
+						cnt = 0;
+						memset(mini_histo,0,sizeof(mini_histo));
+						spacecnt = 0;
+						do
+						{
+							if( floppy->tracks[j]->sides[i]->databuffer[t>>3] & (0x80>>(t&7)) )
+							{
+								cnt++;
+								if(spacecnt >= HISTOSIZE)
+									spacecnt = HISTOSIZE-1;
+
+								mini_histo[spacecnt]++;
+								spacecnt = 0;
+							}
+							else
+							{
+								spacecnt++;
+							}
+
+							t++;
+						}while( t < size);
+
+						fprintf(xmlfile,"\t\t\t\t<track_pulses>%d</track_pulses>\n",cnt);
+						fprintf(xmlfile,"\t\t\t\t<track_pulses_percent>%.4f</track_pulses_percent>\n",((double)cnt/(double)size) * 100.0);
+
+						if(cnt)
+						{
+							fprintf(xmlfile,"\t\t\t\t<track_pulses_histo_percent>");
+							fprintf(xmlfile,"%.1f",(((double)mini_histo[0]/cnt)*100.0));
+							for(t=1;t<HISTOSIZE;t++)
+							{
+								fprintf(xmlfile,",%.1f",(((double)mini_histo[t]/(double)cnt)*100.0));
+							}
+							fprintf(xmlfile,"</track_pulses_histo_percent>\n");
+						}
 
 						if(floppy->tracks[j]->sides[i]->flakybitsbuffer)
 						{
-							size = floppy->tracks[j]->sides[i]->tracklen;
 							t = 0;
 							cnt = 0;
 							do
@@ -429,6 +472,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 									if( floppy->tracks[j]->sides[i]->flakybitsbuffer && export_mode > 0)
 									{
+										int cnt;
 										size = floppy->tracks[j]->sides[i]->tracklen;
 
 										if( sectp->startsectorindex != sectp->endsectorindex )
@@ -477,6 +521,50 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 											fprintf(xmlfile,"\t\t\t\t\t\t<sectordata_weakbits_cells>%d</sectordata_weakbits_cells>\n",cnt);
 											fprintf(xmlfile,"\t\t\t\t\t\t<sectordata_weakbits_percent>%.4f</sectordata_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
+										}
+									}
+
+									if(export_mode > 0)
+									{
+										int sect_size;
+										int cnt = 0;
+										int spacecnt = 0;
+										int size = floppy->tracks[j]->sides[i]->tracklen;
+
+										sect_size++;
+										t = sectp->startsectorindex;
+										memset(mini_histo,0,sizeof(mini_histo));
+
+										do
+										{
+											if( floppy->tracks[j]->sides[i]->databuffer[t>>3] & (0x80>>(t&7)) )
+											{
+												cnt++;
+												if(spacecnt >= HISTOSIZE)
+													spacecnt = HISTOSIZE-1;
+
+												mini_histo[spacecnt]++;
+												spacecnt = 0;
+											}
+											else
+											{
+												spacecnt++;
+											}
+
+											t = (t + 1) % size;
+										}while( t != sectp->endsectorindex);
+
+										fprintf(xmlfile,"\t\t\t\t\t\t<sector_pulses>%d</sector_pulses>\n",cnt);
+
+										if(cnt)
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<sector_pulses_histo_percent>");
+											fprintf(xmlfile,"%.1f",(((double)mini_histo[0]/cnt)*100.0));
+											for(t=1;t<HISTOSIZE;t++)
+											{
+												fprintf(xmlfile,",%.1f",(((double)mini_histo[t]/(double)cnt)*100.0));
+											}
+											fprintf(xmlfile,"</sector_pulses_histo_percent>\n");
 										}
 									}
 
